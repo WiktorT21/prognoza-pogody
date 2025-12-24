@@ -1,5 +1,3 @@
-from random import choice
-
 from data_fetcher import WeatherFetcher
 from weather_processor import WeatherProcessor
 from weather_display import WeatherDisplay
@@ -7,10 +5,10 @@ from peaks_database import get_peak_info, get_all_peaks, szczyty_tatr
 
 class MountainWeatherApp:
     def __init__(self):
-        self.fetcher = WeatherFetcher
-        self.processor = WeatherProcessor
-        self.display = WeatherDisplay
-        self.peaks_db = szczyty_tatr
+        self.fetcher = WeatherFetcher()
+        self.processor = WeatherProcessor()
+        self.display = WeatherDisplay()
+        self.peaks_db = szczyty_tatr()
 
     def run(self):
         self._display_welcome()
@@ -30,7 +28,7 @@ class MountainWeatherApp:
                 print("\n🏔️  Do zobaczenia na szlaku! 🏔️")
                 break
             else:
-                print(" ❌ Nieprawdiłowy wybór sprubuj ponownie")
+                print(" ❌ Nieprawdiłowy wybór spróbuj ponownie")
 
     def _display_welcome(self):
         print("\n" + "=" * 50)
@@ -51,7 +49,7 @@ class MountainWeatherApp:
     def _check_one_peak(self):
         print("\n" + "=" * 50)
         print("🏔️  WYBIERZ SZCZYT")
-        print("\n" + "=" * 50)
+        print("=" * 50)
 
         list_of_peaks = list(self.peaks_db.keys())
         list_of_peaks.sort()
@@ -99,6 +97,59 @@ class MountainWeatherApp:
         print("\n" + "="*50)
         self.display.show_mountain_weather(processed_data)
 
+        """
         save = input("\n💾 Czy zapisać te dane do pliku? (t/n): ".lower())
         if save == 't':
-            self._save_to_file(peak_name, processed_data)
+            self._save_to_file(peak_name, processed_data) """
+
+    def _check_all_peaks(self):
+        print("\n" + "="*50)
+        print("📊 POGODA WE WSZYSTKICH SZCZYTACH")
+        print("="*50)
+        print("⌛ Pobieranie danych... (może chwilę potrwać)\n")
+
+        all_peaks = list(self.peaks_db.keys())
+        results = []
+
+        for i, peak_name in enumerate(all_peaks, start=1):
+            print(f"[{i}/{len(all_peaks)}] {peak_name}...")
+
+            peak_info = get_peak_info(peak_name)
+            if peak_info:
+                raw_data = self.fetcher.fetch_current_weather(
+                    peak_info["lat"],
+                    peak_info["lon"]
+                )
+                if raw_data:
+                    processed = self.processor.process_mountain_weather(
+                        raw_data, peak_info
+                    )
+                    if processed:
+                        results.append(processed)
+
+        print("\n" + "="*50)
+        print("📋 PODSUMOWANIE")
+        print("="*50)
+
+        safe = 0
+        carefully = 0
+        dangerous = 0
+
+        for result in results:
+            rate_level = result['bezpieczenstwo']['poziom']
+            if rate_level == 'bezpiecznie':
+                safe += 1
+            elif rate_level == 'ostroznie':
+                carefully += 1
+            elif rate_level == 'niebezpiecznie':
+                dangerous += 1
+
+        print(f"🟢 Bezpiecznie: {safe} szczytów")
+        print(f"🟡 Ostrożnie: {carefully} szczytów")
+        print(f"🔴 Niebezpiecznie: {dangerous} szczytów")
+        print()
+
+        print("🏔️  SZCZYTY:")
+        for result in results:
+            self.display.show_quick_view(result)
+        print(f"\n✅Pobrano dane dla {len(results)} z {len(all_peaks)} szczytów")
