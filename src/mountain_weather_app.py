@@ -8,7 +8,7 @@ class MountainWeatherApp:
         self.fetcher = WeatherFetcher()
         self.processor = WeatherProcessor()
         self.display = WeatherDisplay()
-        self.peaks_db = szczyty_tatr()
+        self.peaks_db = szczyty_tatr
 
     def run(self):
         self._display_welcome()
