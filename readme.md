@@ -1,5 +1,8 @@
-Aplikacja do prognozowania pogody dla tatrzańskich szczytów
+# 🌄 Aplikacja Pogodowa dla Tatr
 
-Jak narazie zrobiono:
-- Baza danych 15 szczytów tatrzańskich (`src/peaks_database.py`)
-- Funkcje pomocnicze do zarządzania danymi
+## 🏔️ Funkcjonalności
+- Pobieranie aktualnej pogody dla 15 szczytów tatrzańskich
+- Dostosowanie temperatury i ciśnienia do wysokości
+- Ocena bezpieczeństwa warunków górskich
+- Ładne wyświetlanie danych z emoji
+- Cache'owanie zapytań do API
