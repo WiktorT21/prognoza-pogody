@@ -189,6 +189,14 @@ class WeatherProcessor:
             porada = " ".join(parts_of_advice)
             return porada
 
+    def process_forecast_data(self, raw_data, peak_info):
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     print("\n" + "=" * 60)
@@ -255,6 +263,7 @@ if __name__ == "__main__":
         print(f"      Otrzymano: {result['poziom']} (oczekiwane: {expected})")
         if not passed:
             print(f"      Problemy: {result['problemy']}")
+
 
     # ----------------------------------------------------
     # TEST 3: Pełne przetwarzanie danych

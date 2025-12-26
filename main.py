@@ -1,5 +1,6 @@
 import sys
 import os
+import traceback
 
 from lief import exception
 
@@ -63,6 +64,7 @@ def main():
     except Exception as e:
         print(f"\n❌ NIESPODZIEWANY BŁĄD: {type(e).__name__}")
         print(f"Szczegóły: {e}")
+        traceback.print_exc()
 
         input("\nNaciśnij Enter aby zakończyć...")
 

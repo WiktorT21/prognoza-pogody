@@ -153,3 +153,42 @@ class MountainWeatherApp:
         for result in results:
             self.display.show_quick_view(result)
         print(f"\n✅Pobrano dane dla {len(results)} z {len(all_peaks)} szczytów")
+
+    def _check_forecast(self):
+        print("wybierz numer szczytu (1-15): ")
+
+        try:
+            user_choice = int(input())
+        except ValueError:
+            print("❌ To nie jest liczba!")
+            return
+
+        if 1 <= user_choice <= 15:
+            list_of_peaks = list(self.peaks_db.keys())
+            list_of_peaks.sort()
+            peak = list_of_peaks[user_choice - 1]
+            print(f"Pobieram prognoze pogody dla {peak.name}...")
+
+            peak_info = get_peak_info(peak_name)
+            if not peak_info:
+                print(f"❌ Nie znaleziono szczytu: {peak_name}")
+                return
+
+            raw_data = self.fetcher.fetch_forecast(
+                lat = peak_info['lat'], lon = peak_info['lon']
+            )
+            if not raw_data:
+                print(f"❌ Nie udało się pobrać prognozy pogody")
+                return
+
+            processed_data = self.processor.process_forecast_data(
+                raw_data, peak_info
+            )
+
+            if not processed_data:
+                print("❌ Nie udało się przetworzyć prognozy")
+                return
+
+                self.display.show_forecast(peak_info, processed_data)
+            else:
+                print("❌ Nieprawidłowy numer szczytu")

@@ -12,7 +12,7 @@ class WeatherDisplay:
         Temp_dolina = result['Temperatura dolina']
         Temp_szczyt = result['Temperatura szczyt']
         wiatr = result['wiatr']
-        wilgotnosc = result['wilgotnosc']
+        wilgotnosc = result['wilgotność']
         cisnienie = result['cisnienie']
         opis = result['opis']
         bezpieczenstwo = result['bezpieczenstwo']
