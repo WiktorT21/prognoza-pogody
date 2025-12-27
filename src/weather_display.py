@@ -75,6 +75,8 @@ class WeatherDisplay:
         print(f"{nazwa} | {Temp_szczyt} | {wiatr} | {kropka}")
 
 
+    def show_forecast(self):
+
 if __name__ == "__main__":
     # Przykładowe dane do testu
     test_data = {

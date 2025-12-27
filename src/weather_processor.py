@@ -1,4 +1,5 @@
 from src.peaks_database import szczyty_tatr
+from datetime import datetime
 
 
 class WeatherProcessor:
@@ -190,11 +191,66 @@ class WeatherProcessor:
             return porada
 
     def process_forecast_data(self, raw_data, peak_info):
+        if not raw_data or 'list' not in raw_data:
+            print("Błędne dane pogody")
+            return None
 
+        list_of_all_forecast = []
+        peak_height = peak_info['elevation']
+        peak_name = peak_info['name']
 
+        for forecast in raw_data['list']:
+            timestamp = forecast['dt']
+            date_time = datetime.fromtimestamp(timestamp)
+            date_day = date_time.strftime("%Y-%m-%d")
+            hour = date_time.strftime("%H:5M")
 
+            main_data = forecast['main']
+            valley_temp = main_data['temp']
+            humidity = main_data['humidity']
+            pressure = main_data['pressure']
+            wind_data = forecast['wind']
+            wind_speed = wind_data['speed']
 
+            weather_data = forecast['weather'][0]
+            description = weather_data['description']
 
+            peak_temp = self.adjust_the_temperature_to_the_altitude(
+                valley_temp, peak_height
+            )
+            peak_pressure = self.adjust_the_pressure_to_the_altitude(
+                pressure, peak_height
+            )
+            safety_assessment = self.assess_mountain_conditions(
+                peak_temp, wind_speed, description, 10000
+            )
+
+            forecast_dict = {
+                'date_time' : str(date_time),
+                'date' : date_day,
+                'hour' : hour,
+                'temperature valley' : round(valley_temp, 1),
+                'temperature peak' : round(peak_temp, 1),
+                'pressure' : round(peak_pressure, 0),
+                'wind' : round(wind_speed, 1),
+                'humidity' : humidity,
+                'description' : description,
+                'safety' : safety_assessment
+            }
+            list_of_all_forecast.append(forecast_dict)
+            sorted_forecast = sorted(list_of_all_forecast, key=lambda x: x['date_time'])
+
+            if len(sorted_forecast) > 0:
+                result = {
+                    'peak_name' : peak_name,
+                    'elevation' : peak_height,
+                    'forecast_count' : len(sorted_forecast),
+                    'date_range' : f"{sorted_forecast[0]['date']} -> {sorted_forecast[-1]['date']}",
+                    'forecasts' : sorted_forecast
+                }
+                return result
+            else:
+                return None
 
 
 
