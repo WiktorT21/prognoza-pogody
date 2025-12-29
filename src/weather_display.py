@@ -1,4 +1,9 @@
+from datetime import datetime
+
+from statsmodels.tsa.vector_ar.var_model import forecast
+
 from weather_processor import WeatherProcessor
+from datetime import datetime
 
 class WeatherDisplay:
     @staticmethod
@@ -75,7 +80,65 @@ class WeatherDisplay:
         print(f"{nazwa} | {Temp_szczyt} | {wiatr} | {kropka}")
 
 
-    def show_forecast(self):
+    def show_forecast(self, raw_data, peak_info):
+        if raw_data is None:
+            print("❌ Błąd: Brak danych prognozy")
+            return None
+        if 'list' not in raw_data.keys():
+            print("❌ Błąd: Nieprawidłowa struktura danych")
+        if len(raw_data['list']) == 0:
+            print("❌ Błąd: Lista prognoz jest pusta")
+            return None
+
+        all_forecasts = []
+        peak_name = peak_info['name']
+        peak_height = peak_info['elevation']
+        region = peak_info['region']
+        country = peak_info['country']
+
+        for single_forecast in raw_data['list']:
+            timestamp = single_forecast['dt']
+            forecast_datetime = datetime.fromtimestamp(timestamp)
+            date_str = forecast_datetime.strftime("%Y-%m-%d")
+            time_str = forecast_datetime.strftime("%H-%M")
+
+            if 'main' not in single_forecast:
+                continue
+            main_data = single_forecast['main']
+
+            if 'temp' in main_data:
+                valley_temperature = main_data['temp']
+            else:
+                valley_temperature = 0
+
+            if 'humidity' in main_data:
+                humidity = main_data['humidity']
+            else:
+                humidity = 0
+
+            if 'pressure' in main_data:
+                valley_pressure = main_data['pressure']
+            else:
+                valley_pressure = 1013
+
+            if 'wind' in single_forecast:
+                wind_data = single_forecast['wind']
+                if 'speed' in wind_data:
+                    wind_speed = wind_data['speed']
+                else:
+                    wind_speed = 0
+            else:
+                wind_speed = 0
+
+            if 'weather' in single_forecast and len(single_forecast['weather']) > 0:
+                weather_info = single_forecast['weather'][0]
+                if 'description' in weather_info:
+                    weather_description = weather_info['description']
+                else:
+                    weather_description = "Brak opisu"
+            else:
+                weather_description = "Brak opisu"
+
 
 if __name__ == "__main__":
     # Przykładowe dane do testu
