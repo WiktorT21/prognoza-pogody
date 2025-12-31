@@ -17,7 +17,7 @@ class WeatherDisplay:
         Temp_dolina = result['Temperatura dolina']
         Temp_szczyt = result['Temperatura szczyt']
         wiatr = result['wiatr']
-        wilgotnosc = result['wilgotność']
+        wilgotnosc = result['wilgotnosc']
         cisnienie = result['cisnienie']
         opis = result['opis']
         bezpieczenstwo = result['bezpieczenstwo']
@@ -89,6 +89,40 @@ class WeatherDisplay:
         elevation = processed_data['elevation']
         forecast_count = processed_data['forecast_count']
         date_range = processed_data['date_range']
+
+        print("\n📅 PODSUMOWANIE DZIENNE:")
+        print("-" * 50)
+
+        forecasts_by_day = {}
+        for day, day_forecasts in forecasts_by_day.items():
+            temps = [f['temperature_peak'] for f in day_forecasts]
+            winds = [f['wind'] for f in day_forecasts]
+            safeties = [f['safety']['poziom'] for f in day_forecasts]
+
+            temp_min = min(temps)
+            temp_max = max(temps)
+            wind_max = max(winds)
+
+            # Znajdź najgorszy poziom bezpieczeństwa
+            if 'niebezpiecznie' in safeties:
+                worst_safety = 'niebezpiecznie'
+                emoji = "🔴"
+            elif 'ostroznie' in safeties:
+                worst_safety = 'ostroznie'
+                emoji = "🟡"
+            else:
+                worst_safety = 'bezpiecznie'
+                emoji = "🟢"
+
+            print(f"\n{emoji} {day}:")
+            print(f"   🌡️  Temperatura: {temp_min:.1f}°C → {temp_max:.1f}°C")
+            print(f"   💨 Maks. wiatr: {wind_max:.1f} m/s")
+            print(f"   ⚠️  Bezpieczeństwo: {worst_safety}")
+
+            # Najczęstszy opis pogody
+            descriptions = [f['description'] for f in day_forecasts]
+            most_common = max(set(descriptions), key=descriptions.count)
+            print(f"   ⛅ Główne warunki: {most_common}")
 
         # Nagłówek
         print("\n" + "⛰️" * 20)

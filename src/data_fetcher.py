@@ -47,25 +47,25 @@ class WeatherFetcher:
     def fetch_forecast(self, lat, lon, days=5):
         cache_key = "Prognoza_" + str(days) + "_" + str(lat) + "_" + str(lon)
 
-        if self._is_cache_valid(cache_key):
-            print("Używam cache dla prognozy: ", days, " dni dla: ", lat, lon)
-            return self.cache[cache_key]
+        #if self._is_cache_valid(cache_key):
+         #   print("Używam cache dla prognozy: ", days, " dni dla: ", lat, lon)
+          #  return self.cache[cache_key]
 
         try:
             url = Config.get_forecast_url(lat, lon)
-            response = requests.get(url, timeout=10)
+            response = requests.get(url, timeout=15)
 
             if response.status_code == 200:
                 forecast_data = response.json()
 
                 self.cache[cache_key] = forecast_data
                 self.cache_time[cache_key] = time.time()
-
-                print("Pobrano nową prognozę: ", days, "dni dla: ", lat, lon)
+                print(f"✅ Pobrano prognozę: {len(forecast_data.get('list', []))} prognoz")
                 return forecast_data
             else:
-                print("Błąd API: ", response.status_code)
+                print(f"❌ Błąd API {response.status_code}: {response.text[:200]}")
                 return None
+
         except Exception as e:
             print("Błąd połączenia: ", e)
             return None

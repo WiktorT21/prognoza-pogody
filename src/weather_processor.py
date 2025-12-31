@@ -335,20 +335,20 @@ class WeatherProcessor:
             }
             all_forecasts.append(forecast_dict)
 
-            if len(all_forecasts) == 0:
-                print("⚠️  Nie udało się przetworzyć żadnej prognozy")
-                return None
-            sorted_forecasts = sorted(all_forecasts, key=lambda x: x['datetime'])
+        if len(all_forecasts) == 0:
+            print("⚠️  Nie udało się przetworzyć żadnej prognozy")
+            return None
+        sorted_forecasts = sorted(all_forecasts, key=lambda x: x['datetime'])
 
-            result = {
-                'peak_name': peak_name,
-                'elevation': peak_height,
-                'forecast_count': len(sorted_forecasts),
-                'date_range': f"{sorted_forecasts[0]['date']} do {sorted_forecasts[-1]['date']}",
-                'forecasts': sorted_forecasts
-            }
-            print(f"✅ Przetworzono {len(sorted_forecasts)} prognoz dla {peak_name}")
-            return result
+        result = {
+            'peak_name': peak_name,
+            'elevation': peak_height,
+            'forecast_count': len(sorted_forecasts),
+            'date_range': f"{sorted_forecasts[0]['date']} do {sorted_forecasts[-1]['date']}",
+            'forecasts': sorted_forecasts
+        }
+        print(f"✅ Przetworzono {len(sorted_forecasts)} prognoz dla {peak_name}")
+        return result
 
 
 

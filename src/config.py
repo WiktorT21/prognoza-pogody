@@ -38,15 +38,12 @@ class Config:
 
     @classmethod
     def get_forecast_url(cls, lat, lon):
-        """Generate URL for 5-day forecast"""
-        url = (
+        return (
             f"{cls.OPENWEATHER_FORECAST_URL}?"
             f"lat={lat}&lon={lon}&"
             f"appid={cls.OPENWEATHER_API_KEY}&"
             f"units={cls.UNITS}&lang={cls.LANGUAGE}"
         )
-        return url
-
 
 
 # Test

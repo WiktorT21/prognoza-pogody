@@ -64,7 +64,7 @@ def main():
     except Exception as e:
         print(f"\n❌ NIESPODZIEWANY BŁĄD: {type(e).__name__}")
         print(f"Szczegóły: {e}")
-        traceback.print_exc()
+        traceback.print_exc(33)
 
         input("\nNaciśnij Enter aby zakończyć...")
 
