@@ -28,7 +28,7 @@ class WeatherFetcher:
             return self.cache[cache_key]
 
         try:
-            url = Config.get_weather_url(lat, lon)
+            url = Config.get_forecast_url(lat, lon)
             response = requests.get(url, timeout=10)
 
             if response.status_code == 200:
@@ -52,7 +52,7 @@ class WeatherFetcher:
             return self.cache[cache_key]
 
         try:
-            url = Config.get_weather_url(lat, lon, days)
+            url = Config.get_forecast_url(lat, lon)
             response = requests.get(url, timeout=10)
 
             if response.status_code == 200:

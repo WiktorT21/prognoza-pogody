@@ -166,8 +166,8 @@ class MountainWeatherApp:
         if 1 <= user_choice <= 15:
             list_of_peaks = list(self.peaks_db.keys())
             list_of_peaks.sort()
-            peak = list_of_peaks[user_choice - 1]
-            print(f"Pobieram prognoze pogody dla {peak.name}...")
+            peak_name = list_of_peaks[user_choice - 1]
+            print(f"Pobieram prognoze pogody dla {peak_name}...")
 
             peak_info = get_peak_info(peak_name)
             if not peak_info:
@@ -189,6 +189,6 @@ class MountainWeatherApp:
                 print("❌ Nie udało się przetworzyć prognozy")
                 return
 
-                self.display.show_forecast(peak_info, processed_data)
-            else:
-                print("❌ Nieprawidłowy numer szczytu")
+            self.display.show_forecast(peak_info, processed_data)
+        else:
+            print("❌ Nieprawidłowy numer szczytu")

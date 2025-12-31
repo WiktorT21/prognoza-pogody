@@ -240,17 +240,115 @@ class WeatherProcessor:
             list_of_all_forecast.append(forecast_dict)
             sorted_forecast = sorted(list_of_all_forecast, key=lambda x: x['date_time'])
 
-            if len(sorted_forecast) > 0:
-                result = {
-                    'peak_name' : peak_name,
-                    'elevation' : peak_height,
-                    'forecast_count' : len(sorted_forecast),
-                    'date_range' : f"{sorted_forecast[0]['date']} -> {sorted_forecast[-1]['date']}",
-                    'forecasts' : sorted_forecast
+        if len(sorted_forecast) > 0:
+            result = {
+                'peak_name' : peak_name,
+                'elevation' : peak_height,
+                'forecast_count' : len(sorted_forecast),
+                'date_range' : f"{sorted_forecast[0]['date']} -> {sorted_forecast[-1]['date']}",
+                'forecasts' : sorted_forecast
                 }
-                return result
+            return result
+        else:
+            return None
+    def show_forecast(self, raw_data, peak_info):
+        if raw_data is None:
+            print("❌ Błąd: Brak danych prognozy")
+            return None
+        if 'list' not in raw_data.keys():
+            print("❌ Błąd: Nieprawidłowa struktura danych")
+        if len(raw_data['list']) == 0:
+            print("❌ Błąd: Lista prognoz jest pusta")
+            return None
+
+        all_forecasts = []
+        peak_name = peak_info['name']
+        peak_height = peak_info['elevation']
+        region = peak_info['region']
+        country = peak_info['country']
+
+        for single_forecast in raw_data['list']:
+            timestamp = single_forecast['dt']
+            forecast_datetime = datetime.fromtimestamp(timestamp)
+            date_str = forecast_datetime.strftime("%Y-%m-%d")
+            time_str = forecast_datetime.strftime("%H:%M")
+
+            if 'main' not in single_forecast:
+                continue
+            main_data = single_forecast['main']
+
+            if 'temp' in main_data:
+                valley_temperature = main_data['temp']
             else:
+                valley_temperature = 0
+
+            if 'humidity' in main_data:
+                humidity = main_data['humidity']
+            else:
+                humidity = 0
+
+            if 'pressure' in main_data:
+                valley_pressure = main_data['pressure']
+            else:
+                valley_pressure = 1013
+
+            if 'wind' in single_forecast:
+                wind_data = single_forecast['wind']
+                if 'speed' in wind_data:
+                    wind_speed = wind_data['speed']
+                else:
+                    wind_speed = 0
+            else:
+                wind_speed = 0
+
+            if 'weather' in single_forecast and len(single_forecast['weather']) > 0:
+                weather_info = single_forecast['weather'][0]
+                if 'description' in weather_info:
+                    weather_description = weather_info['description']
+                else:
+                    weather_description = "Brak opisu"
+            else:
+                weather_description = "Brak opisu"
+
+            peak_temperature = self.adjust_the_temperature_to_the_altitude(
+                valley_temperature, peak_height
+            )
+            peak_pressure = self.adjust_the_pressure_to_the_altitude(
+                valley_pressure, peak_height
+            )
+            safety_data = self.assess_mountain_conditions(
+                peak_temperature, wind_speed, weather_description, 1000
+            )
+
+            forecast_dict = {
+                'datetime' : str(forecast_datetime),
+                'date' : date_str,
+                'time' : time_str,
+                'temperature_valley' : round(valley_temperature, 1),
+                'temperature_peak' : round(peak_temperature, 1),
+                'pressure' : round(peak_pressure, 0),
+                'wind' : round(wind_speed, 1),
+                'humidity' : humidity,
+                'description' : weather_description,
+                'safety_level' : safety_data['poziom'] if safety_data else 'bezpeicznie',
+                'safety_advice' : safety_data['porada'] if safety_data else 'Brak oceny'
+            }
+            all_forecasts.append(forecast_dict)
+
+            if len(all_forecasts) == 0:
+                print("⚠️  Nie udało się przetworzyć żadnej prognozy")
                 return None
+            sorted_forecasts = sorted(all_forecasts, key=lambda x: x['datetime'])
+
+            result = {
+                'peak_name': peak_name,
+                'elevation': peak_height,
+                'forecast_count': len(sorted_forecasts),
+                'date_range': f"{sorted_forecasts[0]['date']} do {sorted_forecasts[-1]['date']}",
+                'forecasts': sorted_forecasts
+            }
+            print(f"✅ Przetworzono {len(sorted_forecasts)} prognoz dla {peak_name}")
+            return result
 
 
 
