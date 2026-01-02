@@ -23,25 +23,46 @@ class WeatherFetcher:
     def fetch_current_weather(self, lat, lon):
         cache_key = "current_" + str(lat) + "_" + str(lon)
 
-        if self._is_cache_valid(cache_key):
-            print("Używam cache dla: ", lat, lon)
-            return self.cache[cache_key]
-
         try:
-            url = Config.get_forecast_url(lat, lon)
-            response = requests.get(url, timeout=10)
+            url = Config.get_weather_url(lat, lon)
+            print(f"🌐 Pobieram z: {url[:80]}...")
 
-            if response.status_code == 200:
-                weather_data = response.json()
-                self.cache[cache_key] = weather_data
-                self.cache_time[cache_key] = time.time()
-                print("Pobrano nowe dane dla: ", lat, lon)
-                return weather_data
-            else:
-                print("Błąd API: ", response.status_code)
+            response = requests.get(url, timeout=10)
+            print(f"📡 Status odpowiedzi: {response.status_code}")
+
+            # SPRAWDŹ CZY TO BŁĄD API
+            if response.status_code != 200:
+                print(f"❌ BŁĄD API! Status: {response.status_code}")
+                print(f"❌ Treść błędu: {response.text[:200]}")
                 return None
+
+            weather_data = response.json()
+
+            # SPRAWDŹ CZY API ZWRÓCIŁO BŁĄD W TREŚCI
+            if 'cod' in weather_data and weather_data['cod'] != 200:
+                print(f"❌ API zwróciło błąd: {weather_data.get('message', 'nieznany błąd')}")
+                return None
+
+            # SPRAWDŹ CZY SĄ WYMAGANE KLUCZE
+            required_keys = ['main', 'wind', 'weather']
+            missing_keys = [key for key in required_keys if key not in weather_data]
+            if missing_keys:
+                print(f"❌ Brakujące klucze w odpowiedzi: {missing_keys}")
+                print(f"❌ Pełna odpowiedź: {weather_data}")
+                return None
+
+            print(f"✅ Pobrano poprawne dane, klucze: {list(weather_data.keys())}")
+
+            # Tylko jeśli dane są poprawne - zapisz do cache
+            self.cache[cache_key] = weather_data
+            self.cache_time[cache_key] = time.time()
+
+            return weather_data
+
         except Exception as e:
-            print("Błąd połączenia: ", e)
+            print(f"❌ Błąd połączenia: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def fetch_forecast(self, lat, lon, days=5):

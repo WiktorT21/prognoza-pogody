@@ -15,6 +15,13 @@ class WeatherProcessor:
             print("Brak danych do przetworzenia!")
             return  None
 
+        required_keys = ['main', 'wind', 'weather']
+        missing_keys = [key for key in required_keys if key not in raw_data]
+        if missing_keys:
+            print(f"❌ Brakujące klucze w danych: {missing_keys}")
+            print(f"❌ Dostępne klucze: {list(raw_data.keys())}")
+            return None
+
         try:
             valley_temperature = raw_data['main']['temp']
             wind_speed = raw_data['wind']['speed']
@@ -203,7 +210,7 @@ class WeatherProcessor:
             timestamp = forecast['dt']
             date_time = datetime.fromtimestamp(timestamp)
             date_day = date_time.strftime("%Y-%m-%d")
-            hour = date_time.strftime("%H:5M")
+            hour = date_time.strftime("%H:%M")
 
             main_data = forecast['main']
             valley_temp = main_data['temp']
@@ -238,7 +245,8 @@ class WeatherProcessor:
                 'safety' : safety_assessment
             }
             list_of_all_forecast.append(forecast_dict)
-            sorted_forecast = sorted(list_of_all_forecast, key=lambda x: x['date_time'])
+
+        sorted_forecast = sorted(list_of_all_forecast, key=lambda x: x['date_time'])
 
         if len(sorted_forecast) > 0:
             result = {
