@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+from PIL.ImageOps import expand
+from bokeh.colors.named import lightblue
+from click import style
 from qtconsole.mainwindow import background
 
 
@@ -66,10 +69,35 @@ class WeatherGUI:
         )
 
     def create_widgets(self):
-        pass
+        header_frame = tk.Frame(self.root, bg=lightblue)
+        header_frame.pack(fill="x", pady=10)
+
+        title_label = tk.Label(
+            header_frame,
+            text="🌄 APLIKACJA POGODOWA DLA TATR 🌄",
+            font=("Arial", 20, "bold"),
+            bg="#e6f2ff"
+        )
+        title_label.pack()
+
+        subtitle_label = ttk.Label(
+              header_frame,
+            text="Sprawdź warunki pogodowe na szczytach Tatrzańskich!",
+            style="Normal.TLabel"
+        )
+        subtitle_label.pack()
+
+        main_frame = tk.Frame(
+            self.root,
+            bg="#add8e6"
+        )
+        main_frame.pack(
+            pady=20,
+            padx=20,
+            fill="both",
+            expand=True
+        )
 
 
 
 
-    def create_widgets(self):
-        pass
