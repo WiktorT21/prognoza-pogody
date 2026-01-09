@@ -1,12 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-
-from PIL.ImageOps import expand
-from bokeh.colors.named import lightblue
-from click import style
-from docutils.nodes import footer
-from qtconsole.mainwindow import background
-
+from tkinter import ttk, Toplevel
 
 class WeatherGUI:
     def __init__(self, weather_app):
@@ -188,5 +181,41 @@ class WeatherGUI:
             style='Normal.TLabel'
         )
         footer_label.pack()
+
+    def show_single_peak(self):
+        dialog = Toplevel(self.root)
+        dialog.title("🏔️ Wybierz szczyt")
+        dialog.geometry("400x500")
+        dialog.configure(bg="#a7d8ff")
+
+        label = ttk.Label(
+            dialog,
+            text="Wybierz szczyt do sprawdzenia: ",
+            style='Header.TLabel'
+        )
+        label.pack(pady=20)
+
+        listbox_frame = ttk.Frame(dialog, bg="#f0f8ff")
+        listbox_frame.pack(fill='both', expand=True, padx=20, pady=10)
+
+        scrollbar = ttk.Scrollbar(listbox_frame, orient="vertical")
+        scrollbar.pack(side="right", fill="y")
+
+        listbox = tk.Listbox(
+            listbox_frame,
+            yscrollcommand=scrollbar.set,
+            font=('Arial', 11),
+            bg='white',
+            selectbackground='#3498db',
+            height=12
+        )
+        listbox.pack(side="left", fill="both", expand=True)
+        scrollbar.config(command=listbox.yview)
+
+        list_of_peaks = list(self.weather_app.peaks_db.keys())
+        list_of_peaks.sort()
+
+        for i, peak_name in list_of_peaks:
+            listbox.insert(tk.END, f"{i:2}. {peak_name}")
 
 
