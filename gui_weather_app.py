@@ -251,4 +251,13 @@ class WeatherGUI:
         self.result_text.delete("1.0", "end")
         self.display_weather_data(processed_data)
 
+    def display_weather_data(self, data):
+        header_line = "⛰️" * 20 + "\n"
+
+        self.result_text.insert("end", header_line)
+        self.result_text.insert("end", f"{data['peak_name'].upper()} - {data['height']} m n.p.m\n")
+        self.result_text.insert("end", header_line + "\n")
+
+
+
 
