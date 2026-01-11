@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk, Toplevel
+from tkinter import ttk, Toplevel, messagebox
+
 
 class WeatherGUI:
     def __init__(self, weather_app):
@@ -217,5 +218,37 @@ class WeatherGUI:
 
         for i, peak_name in list_of_peaks:
             listbox.insert(tk.END, f"{i:2}. {peak_name}")
+
+    def display_single_peak(self, peak_name):
+        self.result_text.delete("1.0", "end")
+        self.result_text.insert("end", f"\n⌛ Pobieram dane dla {peak_name}...\n")
+        self.root.update()
+
+        peak_info = self.weather_app.peaks_db.get(peak_name)
+
+        if peak_info is None:
+            messagebox.showerror("Błąd", f"Nie znaleziono szczytu: {peak_name}")
+            return
+
+        raw_data = self.weather_app.fetcher.fetch_current_weather(
+            lat = peak_info['lat'],
+            long = peak_info['lon']
+        )
+
+        if raw_data is None:
+            messagebox.showerror("Błąd", "Nie udało się pobrać danych pogodowych")
+            return
+
+        processed_data = self.weather_app.processor.process_mountain_weather(
+            raw_data = raw_data,
+            peak_info = peak_info
+        )
+
+        if processed_data is None:
+            messagebox.showerror("Błąd", "Nie udało się przetworzyć danych")
+            return
+
+        self.result_text.delete("1.0", "end")
+        self.display_weather_data(processed_data)
 
 
