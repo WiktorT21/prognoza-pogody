@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, Toplevel, messagebox
 
+from astropy.units.quantity_helper.function_helpers import insert
+
 
 class WeatherGUI:
     def __init__(self, weather_app):
@@ -254,10 +256,42 @@ class WeatherGUI:
     def display_weather_data(self, data):
         header_line = "⛰️" * 20 + "\n"
 
-        self.result_text.insert("end", header_line)
-        self.result_text.insert("end", f"{data['peak_name'].upper()} - {data['height']} m n.p.m\n")
-        self.result_text.insert("end", header_line + "\n")
+        self.result_text.insert(tk.END, header_line)
+        self.result_text.insert(tk.END, f"{data['peak_name'].upper()} - {data['height']} m n.p.m\n")
+        self.result_text.insert(tk.END, header_line + "\n")
 
+        self.result_text.insert(tk.END, "🌡️ Temperatury:\n")
+        self.result_text.insert(tk.END, f"W dolinie {data['Temperatura dolina']} °C\n")
+        self.result_text.insert(tk.END, f"Na szczycie: {data['Temperatura szczyt']} °C\n")
 
+        self.result_text.insert(tk.END, "📊 Warunki pogodowe:\n" )
 
+        wind = data['wind']
 
+        if wind < 5:
+            wind_description = "łagodny"
+        elif wind < 10:
+            wind_description = "umiarkowany"
+        elif wind < 15:
+            wind_description = "silny"
+        else:
+            wind_description = "bardzo silny"
+
+        self.result_text.insert(tk.END, f"💨 Wiatr:   {round(wind, 1)} m/s {wind_description}\n")
+        self.result_text.insert(tk.END, f"💧 Wilgotność: {str(data['humidity'])} &\n")
+        self.result_text.insert(tk.END, f"📈 Ciśnienie: {str(data['pressure'])} hPa\n")
+        self.result_text.insert(tk.END, f"⛅ Opis: {str(data['description'])}\n\n")
+
+        self.result_text.insert(tk.END, "🛡️ Ocena bezpieczeństwa:\n")
+
+        safety_level = data['safety_level']
+
+        if safety_level == 'bezpiecznie':
+            self.result_text.insert(tk.END, "✅ Warunki Bezpieczne\n")
+            self.result_text.insert(tk.END, "🟢 Możesz bezpiecznie planować wyjście w góry\n")
+        elif safety_level == 'ostrożnie':
+            self.result_text.insert(tk.END, "⚠️ Wymaga ostrożności\n")
+            self.result_text.insert(tk.END, "🟡 Zachowaj ostrożność, warunki mogą być trudne\n")
+        elif safety_level == 'niebezpiecznie':
+            self.result_text.insert(tk.END, "🚨 Warunki niebezpieczne\n")
+            self.result_text.insert(tk.END, "🔴 Odradzamy wyjście w góry\n")

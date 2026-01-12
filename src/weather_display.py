@@ -22,6 +22,12 @@ class WeatherDisplay:
         opis = result['opis']
         bezpieczenstwo = result['bezpieczenstwo']
 
+        if isinstance(bezpieczenstwo, dict):
+            poziom = bezpieczenstwo.get('poziom', 'bezpiecznie')
+            porada = bezpieczenstwo.get('porada', '')
+        else:
+            poziom = bezpieczenstwo  # String
+
         print("")
         print("⛰️"*10)
         print(f"{nazwa.upper()} - {wyskosc} m n.p.m")
@@ -69,6 +75,11 @@ class WeatherDisplay:
         wiatr = result['wiatr']
         bezpieczenstwo = result['bezpieczenstwo']
         poziom = result['bezpieczenstwo']
+
+        if isinstance(bezpieczenstwo, dict):
+            poziom = bezpieczenstwo.get('poziom', 'bezpiecznie')
+        else:
+            poziom = bezpieczenstwo  # String
 
         if poziom == 'bezpiecznie':
             kropka = "✅"
