@@ -1,7 +1,9 @@
 import tkinter as tk
+from itertools import count
 from tkinter import ttk, Toplevel, messagebox
 
 from astropy.units.quantity_helper.function_helpers import insert
+from pyflakes.checker import counter
 
 
 class WeatherGUI:
@@ -335,7 +337,75 @@ class WeatherGUI:
         thread = threading.Thread(target=fetch_all_peaks, daemon=True)
         thread.start()
 
-    def display_all_peaks_summary(self):
+    def display_all_peaks_summary(self, results):
+        self.clear_screen()
+
+        if not results:
+            self.result_text.insert(tk.END, "❌ Nie udało się pobrać żadnych danych!\n")
+            self.result_text.insert(tk.END, "   Sprawdź połączenie internetowe i klucz API.\n")
+            return
+
+        self.result_text.insert(tk.END, "=" * 50 + "\n")
+        self.result_text.insert(tk.END, "📊 POGODA WE WSZYSTKICH SZCZYTACH\n")
+        self.result_text.insert(tk.END, "=" * 50 + "\n\n")
+
+        counter_safe = 0
+        counter_caution = 0
+        counter_dangerous = 0
+
+        for result in results:
+            safety_level = result['bezpieczenstwo']
+
+            if isinstance(safety_level, dict):
+                safety_level = safety_level.get('poziom', 'bezpiecznie')
+            else:
+                safety_level = safety_level
+
+            if safety_level == 'bezpiecznie':
+                counter_safe += 1
+            elif safety_level == 'ostroznie':
+                counter_caution += 1
+            elif safety_level == 'niebezpiecznie':
+                counter_dangerous += 1
+
+        self.result_text.insert(tk.END, "📋 PODSUMOWANIE:\n")
+        self.result_text.insert(tk.END, "=" * 50 + "\n")
+        self.result_text.insert(tk.END, f"🟢 Bezpiecznie: " + str(counter_safe) + " szczytów\n\n")
+        self.result_text.insert(tk.END, f"🟡 Ostrożnie: " + str(counter_caution) + " szczytów\n\n")
+        self.result_text.insert(tk.END, f"🔴 Niebezpiecznie: " + str(counter_dangerous) + " szczytów\n\n")
+
+        self.result_text.insert(tk.END, "🏔️ SZCZYTY:\n")
+        self.result_text.insert(tk.END, "-" * 50 + "\n")
+
+        for result in results:
+            name = result['name']
+            temperature = result['tempreature']
+            wind = result['wind']
+            level = result['bezpieczenstwo']
+
+            bezpieczenstwo = result['bezpieczenstwo']
+            if isinstance(bezpieczenstwo, dict):
+                level = bezpieczenstwo.get('poziom', 'bezpiecznie')
+            else:
+                level = bezpieczenstwo
+
+            if level == 'bezpiecznie':
+                icon = "✅"
+            elif level == 'ostroznie':
+                icon = "⚠️"
+            else:
+                icon = "🚨"
+
+            temp_float = float(temperature)
+            wind_float = float(wind)
+
+            line = f"{icon} {name:25} | {temperature:5.1f}°C | {wind:5.1f} m/s | {level}"
+            self.result_text.insert(tk.END, line + "\n")
+
+        all_numbers_off_peaks = len(self.weather_app.peaks_db)
+        self.result_text.insert(tk.END, "\n\n")
+        self.result_text.insert(tk.END, f"✅ Pobrano dane dla {len(results)} z {all_numbers_off_peaks} szczytów\n")
+
 
 
 
