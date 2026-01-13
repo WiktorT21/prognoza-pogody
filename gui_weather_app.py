@@ -295,3 +295,36 @@ class WeatherGUI:
         elif safety_level == 'niebezpiecznie':
             self.result_text.insert(tk.END, "🚨 Warunki niebezpieczne\n")
             self.result_text.insert(tk.END, "🔴 Odradzamy wyjście w góry\n")
+
+    def show_all_peaks(self):
+        self.result_text.delete("1.0", "end")
+        self.result_text.insert(tk.END, "\n⌛ Pobieranie danych... (może chwilę potrwać)\n")
+        self.root.update_idletasks()
+        self.root.update()
+
+        results = []
+        all_peaks = self.weather_app.peaks_db.keys()
+        all_peaks.sort()
+
+        for i, peak_name in enumerate(all_peaks, 1):
+            self.result_text.insert(tk.END, f"[{i}/{len(all_peaks)}] {peak_name}...\n")
+            self.root.update()
+
+            peak_info = self.weather_app.peaks_db.get(peak_name)
+
+            if peak_info is not None:
+                raw_data = self.weather_app.fetcher.fetch_current_weather(
+                    self.weather_app.fetcher,
+                    peak_info['lat'],
+                    peak_info['lon']
+                )
+                if raw_data is not None:
+                    processed = self.weather_app.processor.process_mountain_weather(
+                        raw_data,
+                        peak_info
+                    )
+                    if processed is not None:
+                        results.append(processed)
+        self.result_text.delete("1.0", "end")
+        self.display_all_peaks_summary(results)
+
