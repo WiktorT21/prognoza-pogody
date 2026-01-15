@@ -239,7 +239,7 @@ class WeatherGUI:
 
         raw_data = self.weather_app.fetcher.fetch_current_weather(
             lat = peak_info['lat'],
-            long = peak_info['lon']
+            lon = peak_info['lon']
         )
 
         if raw_data is None:
@@ -476,6 +476,39 @@ class WeatherGUI:
             style='Red.TButton'
         )
         cancel_btn.pack(side='left', padx=10)
+
+    def display_forecast(self, peak_name):
+        self.result_text.delete("1.0", tk.END)
+        self.result_text.insert(tk.END, f"\n⌛ Pobieram dane dla {peak_name}...\n")
+        self.root.update()
+
+        peak_info = self.weather_app.peaks_db.get(peak_name)
+
+        if not peak_info:
+            messagebox.showerror("Błąd", f" ❌ Nie znaleziono szczytu: {peak_name}")
+            return
+
+        raw_forecast_data = self.weather_app.fetcher.fetch_forecast(
+            lat=peak_info['lat'],
+            lon=peak_info['lon']
+        )
+
+        if not raw_forecast_data:
+            messagebox.showerror("Błąd", " ❌ Nie udało się pobrać prognozy pogody")
+            return
+
+        processed_forecast_data = self.weather_app.processor.process_forecast_data(raw_forecast_data, peak_info)
+
+        if not processed_forecast_data:
+            messagebox.showerror("Błąd", " ❌ Nie udało się przetworzyć prognozy")
+            return
+
+        self.result_text.delete("1.0", tk.END)
+        self.display_forecast_data(processed_forecast_data)
+
+
+
+
 
 
 
