@@ -2,7 +2,10 @@ import tkinter as tk
 from itertools import count
 from tkinter import ttk, Toplevel, messagebox
 
+from PIL.ImageOps import expand
 from astropy.units.quantity_helper.function_helpers import insert
+from click import style
+from holoviews.examples.gallery.apps.bokeh.gapminder import button
 from pyflakes.checker import counter
 
 
@@ -405,6 +408,79 @@ class WeatherGUI:
         all_numbers_off_peaks = len(self.weather_app.peaks_db)
         self.result_text.insert(tk.END, "\n\n")
         self.result_text.insert(tk.END, f"✅ Pobrano dane dla {len(results)} z {all_numbers_off_peaks} szczytów\n")
+
+    def show_forecast(self):
+        dialog = Toplevel(self.root)
+        dialog.title("📅 Prognoza na 5 dni")
+        dialog.geometry("400x500")
+        dialog.configure(bg="#f0f8ff")
+
+        label = ttk.Label(
+            dialog,
+            text = "Wybierz szczyt do prognozy: ",
+            style = 'Header.TLabel'
+        )
+        label.pack(pady=20)
+
+        listbox_frame = tk.Frame(dialog, bg="#f0f8ff")
+        listbox_frame.pack(fill='both', expand=True, padx=20, pady=10)
+
+        scrollbar = tk.Scrollbar(listbox_frame, orient='vertical')
+        scrollbar.pack(side='right', fill='y')
+
+        listbox = tk.Listbox(
+            listbox_frame,
+            yscrollcommand=scrollbar.set,
+            font=('Arial', 11),
+            bg="white",
+            fg="black",
+            selectbackground="#3498db",
+            selectforeground="white",
+            height=12
+        )
+        listbox.pack(side='left', fill='both', expand=True)
+        scrollbar.config(command=listbox.yview)
+
+        list_of_peaks = list(self.weather_app.peaks_db.keys())
+        list_of_peaks.sort()
+
+        for i, peak_name in enumerate(list_of_peaks, 1):
+            listbox.insert(tk.END, f"{i:2}. {peak_name}")
+
+        def on_select():
+            selection = listbox.curselection()
+            if not selection:
+                messagebox.showwarning("Uwaga", "Wybierz szczyt z listy")
+                return
+
+            index = selection[0]
+            selected_peak = list_of_peaks[index]
+            dialog.destroy()
+            self.display_forecast(selected_peak)
+
+        button_frame = tk.Frame(dialog, bg="#f0f8ff")
+        button_frame.pack(pady=20)
+
+        select_btn = ttk.Button(
+            button_frame,
+            text="✅ Pokaż prognozę",
+            command=on_select,
+            style='Green.TButton'
+        )
+        select_btn.pack(side='left', padx=10)
+
+        cancel_btn = ttk.Button(
+            button_frame,
+            text="❌ Anuluj",
+            command=dialog.destroy,
+            style='Red.TButton'
+        )
+        cancel_btn.pack(side='left', padx=10)
+
+
+
+
+
 
 
 
