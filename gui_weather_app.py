@@ -506,7 +506,51 @@ class WeatherGUI:
         self.result_text.delete("1.0", tk.END)
         self.display_forecast_data(processed_forecast_data)
 
+    def display_forecast_data(self, data):
+        self.result_text.insert(tk.END, "⛰️" * 20 + "\n")
+        self.result_text.insert(tk.END, f"📅 PROGNOZA POGODY DLA: {data['peak_name'].upper()}\n")
+        self.result_text.insert(tk.END, f"📍 Wysokość: {data['elevation']} m n.p.m.\n")
+        self.result_text.insert(tk.END, f"📊 Liczba prognoz: {data['forecast_count']}\n")
+        self.result_text.insert(tk.END, f"⏰ Zakres: {data['date_range']}\n")
+        self.result_text.insert(tk.END, "⛰️" * 20 + "\n\n")
 
+        forecast_by_day = {}
+
+        for forecast in data['forecasts']:
+            forecast_date = forecast['date']
+
+            if forecast_date not in forecast_by_day:
+                forecast_by_day[forecast_date] = []
+
+            forecast_by_day[forecast_date].append(forecast)
+
+        self.result_text.insert(tk.END,"📅 PODSUMOWANIE DZIENNE:\n")
+        self.result_text.insert("-" * 50 + "\n")
+
+        for date in sorted(forecast_by_day.keys()):
+            day_forecast = forecast_by_day['date']
+
+            temperature_list = []
+            wind_list = []
+            safety_list = []
+            description_list = []
+
+            for forecast in day_forecast:
+                temperature = forecast.get('temperature_peak') or forecast.get('temperature peak') or 0
+                temperature_list.appendfloat((temperature))
+
+                wind = forecast.get('wind', 0)
+                wind_list.append(float(wind))
+
+                safety = forecast.get('safety', {})
+                if isinstance(safety, dict):
+                    safety_level = safety.get('poziom', 'bezpiecznie')
+                else:
+                    safety_level = str(safety)
+                safety_list.append(safety_level)
+
+                description = forecast.get('description', '')
+                description_list.append(description)
 
 
 
