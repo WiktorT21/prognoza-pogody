@@ -1,13 +1,5 @@
 import tkinter as tk
-from itertools import count
 from tkinter import ttk, Toplevel, messagebox
-
-from PIL.ImageOps import expand
-from astropy.units.quantity_helper.function_helpers import insert
-from click import style
-from holoviews.examples.gallery.apps.bokeh.gapminder import button
-from pyflakes.checker import counter
-
 
 class WeatherGUI:
     def __init__(self, weather_app):
@@ -507,6 +499,8 @@ class WeatherGUI:
         self.display_forecast_data(processed_forecast_data)
 
     def display_forecast_data(self, data):
+        self.clear_screen()
+
         self.result_text.insert(tk.END, "⛰️" * 20 + "\n")
         self.result_text.insert(tk.END, f"📅 PROGNOZA POGODY DLA: {data['peak_name'].upper()}\n")
         self.result_text.insert(tk.END, f"📍 Wysokość: {data['elevation']} m n.p.m.\n")
@@ -525,10 +519,10 @@ class WeatherGUI:
             forecast_by_day[forecast_date].append(forecast)
 
         self.result_text.insert(tk.END,"📅 PODSUMOWANIE DZIENNE:\n")
-        self.result_text.insert("-" * 50 + "\n")
+        self.result_text.insert(tk.END, "-" * 50 + "\n")
 
         for date in sorted(forecast_by_day.keys()):
-            day_forecast = forecast_by_day['date']
+            day_forecast = forecast_by_day[date]
 
             temperature_list = []
             wind_list = []
@@ -537,7 +531,7 @@ class WeatherGUI:
 
             for forecast in day_forecast:
                 temperature = forecast.get('temperature_peak') or forecast.get('temperature peak') or 0
-                temperature_list.appendfloat((temperature))
+                temperature_list.append(float(temperature))
 
                 wind = forecast.get('wind', 0)
                 wind_list.append(float(wind))
@@ -551,6 +545,55 @@ class WeatherGUI:
 
                 description = forecast.get('description', '')
                 description_list.append(description)
+
+            if temperature_list:
+                min_temp = min(temperature_list)
+                max_temp = max(temperature_list)
+            else:
+                min_temp = 0
+                max_temp = 0
+
+            if wind_list:
+                max_wind = max(wind_list)
+            else:
+                max_wind = 0
+
+            if 'niebezpiecznie' in safety_list:
+                worst_level = 'niebezpiecznie'
+                emoji = "🔴"
+            elif 'ostroznie' in safety_list:
+                worst_level = 'ostroznie'
+                emoji = "🟡"
+            else:
+                worst_level = 'bezpiecznie'
+                emoji = "🟢"
+
+            most_common = ""
+            if description_list:
+                non_empty = [d for d in description_list if d]
+                if non_empty:
+                    most_common = max(set(non_empty), key=non_empty.count)
+
+            self.result_text.insert(tk.END, f"\n{emoji} 📅 {date}:\n")
+            self.result_text.insert(tk.END, f"   🌡️  Temperatura: {min_temp:.1f}°C → {max_temp:.1f}°C\n")
+            self.result_text.insert(tk.END, f"   💨 Maks. wiatr: {max_wind:.1f} m/s\n")
+            self.result_text.insert(tk.END, f"   🛡️  Bezpieczeństwo: {worst_level.upper()}\n")
+
+
+            if most_common:
+                self.result_text.insert(tk.END, f"   ⛅ Główne warunki: {most_common}\n")
+
+            self.result_text.insert(tk.END, f"   📊 Prognoz w dniu: {len(day_forecast)}\n")
+            self.result_text.insert(tk.END, "   " + "-" * 40 + "\n")
+
+            days_count = len(forecast_by_day)
+            self.result_text.insert(tk.END, "\n" + "-" * 50 + "\n")
+            self.result_text.insert(tk.END, f"✅ Wyświetlono prognozę na {days_count} dni\n")
+
+
+
+
+
 
 
 
