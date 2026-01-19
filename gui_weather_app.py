@@ -590,6 +590,20 @@ class WeatherGUI:
             self.result_text.insert(tk.END, "\n" + "-" * 50 + "\n")
             self.result_text.insert(tk.END, f"✅ Wyświetlono prognozę na {days_count} dni\n")
 
+    def clear_display(self):
+        self.result_text.delete("1.0", tk.END)
+
+    def exit_app(self):
+        response = messagebox.askyesno(
+            "Potwierdzenie wyjścia",
+            "Czy na pewno chcesz zamknąć aplikację pogodową?",
+            icon='question'
+        )
+
+        if response:
+            self.root.destroy()
+            print("Aplikacja zamknięta. Do zobaczenia! 🏔️")
+
 
 
 
