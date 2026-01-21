@@ -1,4 +1,4 @@
-from src.peaks_database import szczyty_tatr
+from peaks_database import szczyty_tatr
 from datetime import datetime
 
 

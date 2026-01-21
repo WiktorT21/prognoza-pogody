@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, Toplevel, messagebox
+from datetime import datetime
+import threading
 
 class WeatherGUI:
     def __init__(self, weather_app):
@@ -162,11 +164,8 @@ class WeatherGUI:
 
         scrollbar.config(command=self.result_text.yview)
 
-        self.result_text.grid(row=0, column=0, sticky='nsew')
-        scrollbar.grid(row=0, column=1, sticky='ns')
-
-        text_frame.grid_rowconfigure(0, weight=1)
-        text_frame.grid_columnconfigure(0, weight=1)
+        self.result_text.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y')
 
         footer_frame = tk.Frame(
             self.root,
@@ -195,7 +194,7 @@ class WeatherGUI:
         )
         label.pack(pady=20)
 
-        listbox_frame = ttk.Frame(dialog, bg="#f0f8ff")
+        listbox_frame = tk.Frame(dialog, bg="#f0f8ff")
         listbox_frame.pack(fill='both', expand=True, padx=20, pady=10)
 
         scrollbar = ttk.Scrollbar(listbox_frame, orient="vertical")
@@ -215,8 +214,39 @@ class WeatherGUI:
         list_of_peaks = list(self.weather_app.peaks_db.keys())
         list_of_peaks.sort()
 
-        for i, peak_name in list_of_peaks:
+        for i, peak_name in enumerate(list_of_peaks, 1):
             listbox.insert(tk.END, f"{i:2}. {peak_name}")
+
+        def on_select():
+            """Funkcja wywoływana po kliknięciu Wybierz"""
+            selection = listbox.curselection()
+            if not selection:
+                messagebox.showwarning("Uwaga", "Wybierz szczyt z listy")
+                return
+
+            index = selection[0]
+            selected_peak = list_of_peaks[index]
+            dialog.destroy()
+            self.display_single_peak(selected_peak)
+
+        button_frame = tk.Frame(dialog, bg="#a7d8ff")
+        button_frame.pack(pady=20)
+
+        select_btn = ttk.Button(
+            button_frame,
+            text="✅ Wybierz",
+            command=on_select,
+            style='Green.TButton'
+        )
+        select_btn.pack(side='left', padx=10)
+
+        cancel_btn = ttk.Button(
+            button_frame,
+            text="❌ Anuluj",
+            command=dialog.destroy,
+            style='Red.TButton'
+        )
+        cancel_btn.pack(side='left', padx=10)
 
     def display_single_peak(self, peak_name):
         self.result_text.delete("1.0", "end")
@@ -254,7 +284,7 @@ class WeatherGUI:
         header_line = "⛰️" * 20 + "\n"
 
         self.result_text.insert(tk.END, header_line)
-        self.result_text.insert(tk.END, f"{data['peak_name'].upper()} - {data['height']} m n.p.m\n")
+        self.result_text.insert(tk.END, f"{data['nazwa szczytu'].upper()} - {data['wysokosc']} m n.p.m\n")
         self.result_text.insert(tk.END, header_line + "\n")
 
         self.result_text.insert(tk.END, "🌡️ Temperatury:\n")
@@ -302,7 +332,7 @@ class WeatherGUI:
         def fetch_all_peaks():
             try:
                 results = []
-                all_peaks = self.weather_app.peaks_db.keys()
+                all_peaks = list(self.weather_app.peaks_db.keys())  # Dodaj list()
                 all_peaks.sort()
 
                 for i, peak_name in enumerate(all_peaks, 1):
@@ -313,8 +343,7 @@ class WeatherGUI:
 
                     if peak_info is not None:
                         raw_data = self.weather_app.fetcher.fetch_current_weather(
-                            self.weather_app.fetcher,
-                            peak_info['lat'],
+                            peak_info['lat'],  # USUŃ self.weather_app.fetcher z początku
                             peak_info['lon']
                         )
                         if raw_data is not None:
@@ -324,9 +353,13 @@ class WeatherGUI:
                             )
                             if processed is not None:
                                 results.append(processed)
-                self.root.after(0, lambda: self.display_all_peaks_summary(results))
+
+                # Przekaż results do funkcji wyświetlającej
+                self.root.after(0, lambda res=results: self.display_all_peaks_summary(res))
+
             except Exception as e:
-                self.root.after(0, lambda: self.result_text.insert(tk.END, f"❌ Błąd: {e}\n"))
+                error_msg = str(e)
+                self.root.after(0, lambda msg=error_msg: self.show_error(msg))
 
         import threading
         thread = threading.Thread(target=fetch_all_peaks, daemon=True)
@@ -373,12 +406,11 @@ class WeatherGUI:
         self.result_text.insert(tk.END, "-" * 50 + "\n")
 
         for result in results:
-            name = result['name']
-            temperature = result['tempreature']
-            wind = result['wind']
-            level = result['bezpieczenstwo']
+            name = result.get('nazwa szczytu', 'Nieznany szczyt')
+            temperature = result.get('Temperatura szczyt' ,0)
+            wind = result.get('wiatr', 0)
 
-            bezpieczenstwo = result['bezpieczenstwo']
+            bezpieczenstwo = result.get('bezpieczenstwo', {})
             if isinstance(bezpieczenstwo, dict):
                 level = bezpieczenstwo.get('poziom', 'bezpiecznie')
             else:
@@ -394,7 +426,7 @@ class WeatherGUI:
             temp_float = float(temperature)
             wind_float = float(wind)
 
-            line = f"{icon} {name:25} | {temperature:5.1f}°C | {wind:5.1f} m/s | {level}"
+            line = f"{icon} {name:25} | {temp_float:5.1f}°C | {wind_float:5.1f} m/s | {level}"
             self.result_text.insert(tk.END, line + "\n")
 
         all_numbers_off_peaks = len(self.weather_app.peaks_db)
@@ -603,6 +635,15 @@ class WeatherGUI:
         if response:
             self.root.destroy()
             print("Aplikacja zamknięta. Do zobaczenia! 🏔️")
+
+    def run(self):
+        self.root.mainloop()
+
+    def clear_screen(self):
+        self.result_text.delete("1.0", tk.END)
+
+    def show_error(self, error_message):
+        self.result_text.insert(tk.END, f"❌ Błąd: {error_message}\n")
 
 
 

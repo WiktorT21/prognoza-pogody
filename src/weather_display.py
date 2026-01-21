@@ -1,10 +1,5 @@
 from datetime import datetime
 
-from statsmodels.tsa.vector_ar.var_model import forecast
-
-from weather_processor import WeatherProcessor
-from datetime import datetime
-
 class WeatherDisplay:
     @staticmethod
     def show_mountain_weather(result):
